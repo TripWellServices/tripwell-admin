@@ -31,10 +31,12 @@ const UserTable = ({ users, onDeleteUser, loading }) => {
 
   const getRoleBadge = (role) => {
     switch (role) {
-      case 'admin':
-        return { label: 'Admin', color: 'bg-red-100 text-red-800', icon: <Crown className="h-3 w-3" /> };
-      case 'dev':
-        return { label: 'Dev', color: 'bg-purple-100 text-purple-800', icon: <Shield className="h-3 w-3" /> };
+      case 'originator':
+        return { label: 'Originator', color: 'bg-blue-100 text-blue-800', icon: <Crown className="h-3 w-3" /> };
+      case 'participant':
+        return { label: 'Participant', color: 'bg-green-100 text-green-800', icon: <User className="h-3 w-3" /> };
+      case 'noroleset':
+        return { label: 'No Role', color: 'bg-gray-100 text-gray-800', icon: <Shield className="h-3 w-3" /> };
       default:
         return { label: 'User', color: 'bg-gray-100 text-gray-800', icon: <User className="h-3 w-3" /> };
     }

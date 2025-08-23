@@ -42,20 +42,8 @@ export const useAdminApi = () => {
 
       const data = await response.json();
       
-      // Transform the data to match our expected structure
-      const transformedUsers = data.map(user => ({
-        userId: user.userId || user._id,
-        email: user.email,
-        createdAt: user.createdAt,
-        lastActiveAt: user.lastActiveAt,
-        tripId: user.tripId,
-        tripCreatedAt: user.tripCreatedAt,
-        tripCompletedAt: user.tripCompletedAt,
-        role: user.role || 'user',
-        profileComplete: user.profileComplete || false
-      }));
-      
-      return transformedUsers;
+      // Backend already sends the correct structure, just return it
+      return data;
     } catch (err) {
       setError(err.message);
       throw err;
