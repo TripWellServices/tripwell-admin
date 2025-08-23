@@ -8,7 +8,7 @@ export default defineConfig({
     port: 3001,
     proxy: {
       '/tripwell/admin': {
-        target: 'http://localhost:5000',
+        target: 'https://gofastbackend.onrender.com',
         changeOrigin: true,
       }
     }
