@@ -18,7 +18,7 @@ const Home = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('/tripwell/admin/login', {
+      const response = await fetch('https://gofastbackend.onrender.com/tripwell/admin/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

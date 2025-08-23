@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { auth } from '../firebase.js';
 
-const API_BASE_URL = '/tripwell/admin'; // This will be proxied to http://localhost:5000/tripwell/admin
+const API_BASE_URL = 'https://gofastbackend.onrender.com/tripwell/admin'; // Direct to Render backend
 
 export const useAdminApi = () => {
   const [loading, setLoading] = useState(false);
