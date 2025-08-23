@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { auth } from '../firebase.js';
 
-const API_BASE_URL = '/admin'; // This will be proxied to http://localhost:5000/admin
+const API_BASE_URL = '/tripwell/admin'; // This will be proxied to http://localhost:5000/tripwell/admin
 
 export const useAdminApi = () => {
   const [loading, setLoading] = useState(false);
