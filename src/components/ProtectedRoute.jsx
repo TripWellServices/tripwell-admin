@@ -30,7 +30,7 @@ const ProtectedRoute = ({ children }) => {
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
-            <Button className="w-full" onClick={() => window.location.href = '/'}>
+            <Button className="w-full" onClick={() => window.location.href = '/login'}>
               <LogIn className="h-4 w-4 mr-2" />
               Go to Login
             </Button>
@@ -50,16 +50,23 @@ const ProtectedRoute = ({ children }) => {
             </div>
             <CardTitle>Access Denied</CardTitle>
             <CardDescription>
-              You don't have permission to access the admin dashboard.
+              You don't have admin permission to access this dashboard.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
-            <p className="text-sm text-muted-foreground mb-4">
-              Contact an administrator if you believe this is an error.
-            </p>
-            <Button variant="outline" onClick={() => window.history.back()}>
-              Go Back
-            </Button>
+            <div className="text-sm text-muted-foreground mb-4 space-y-2">
+              <p>Logged in as: {user.email}</p>
+              <p>Role: {user.role || 'No role set'}</p>
+              <p>You need <code className="bg-gray-100 px-1 rounded">role: "admin"</code> to access this.</p>
+            </div>
+            <div className="space-y-2">
+              <Button variant="outline" onClick={() => window.location.href = '/login'}>
+                Try Different Account
+              </Button>
+              <Button variant="outline" onClick={() => window.history.back()}>
+                Go Back
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

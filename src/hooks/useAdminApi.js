@@ -8,15 +8,20 @@ export const useAdminApi = () => {
   const [error, setError] = useState(null);
 
   const getAuthHeaders = useCallback(async () => {
-    const user = auth.currentUser;
-    if (!user) {
-      throw new Error('No authenticated user');
+    // Simple admin auth - get credentials from localStorage
+    const adminLoggedIn = localStorage.getItem('adminLoggedIn');
+    if (!adminLoggedIn) {
+      throw new Error('Not logged in as admin');
     }
     
-    const token = await user.getIdToken();
+    // In production, these would come from environment variables
+    const username = 'admin';
+    const password = 'tripwell2024';
+    
     return {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'username': username,
+      'password': password
     };
   }, []);
 
