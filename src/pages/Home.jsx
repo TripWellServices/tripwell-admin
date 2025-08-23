@@ -17,15 +17,30 @@ const Home = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Simple admin credentials - in production, this would be server-side
-    if (username === 'admin' && password === 'tripwell2024') {
-      setIsLoggedIn(true);
-      toast.success('Welcome to TripWell Admin!');
-      localStorage.setItem('adminLoggedIn', 'true');
-    } else {
-      toast.error('Invalid credentials');
+    try {
+      const response = await fetch('/tripwell/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setIsLoggedIn(true);
+        toast.success('Welcome to TripWell Admin!');
+        localStorage.setItem('adminLoggedIn', 'true');
+      } else {
+        toast.error(data.error || 'Invalid credentials');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('Failed to connect to server');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleLogout = () => {

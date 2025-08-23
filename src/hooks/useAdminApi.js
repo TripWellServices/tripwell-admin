@@ -16,7 +16,7 @@ export const useAdminApi = () => {
     
     // In production, these would come from environment variables
     const username = 'admin';
-    const password = 'tripwell2024';
+    const password = 'tripwell2025';
     
     return {
       'Content-Type': 'application/json',
