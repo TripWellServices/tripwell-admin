@@ -1,24 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Mail, MapPin, ExternalLink } from 'lucide-react';
+import { Users, Mail, MapPin, ExternalLink, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card.jsx';
-import { useAdminApi } from '../hooks/useAdminApi.js';
+import { Button } from '../components/ui/button.jsx';
 import toast, { Toaster } from 'react-hot-toast';
 
 const UserDashboard = () => {
   const [users, setUsers] = useState([]);
-  const { fetchUsers, loading, error } = useAdminApi();
+  const [loading, setLoading] = useState(false);
 
-  const loadUsers = async () => {
+  const loadUsersFromCache = () => {
+    setLoading(true);
     try {
-      const userData = await fetchUsers();
-      setUsers(userData);
+      const hydratedUsers = localStorage.getItem('hydratedUsers');
+      if (hydratedUsers) {
+        const userData = JSON.parse(hydratedUsers);
+        setUsers(userData);
+        toast.success(`Loaded ${userData.length} users from cache`);
+      } else {
+        toast.error('No users found in cache. Please hydrate users first.');
+      }
     } catch (err) {
-      toast.error('Failed to load users: ' + err.message);
+      toast.error('Failed to load users from cache: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadUsers();
+    loadUsersFromCache();
   }, []);
 
   const getTripStatus = (user) => {
@@ -49,20 +58,28 @@ const UserDashboard = () => {
       
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-6 w-6" />
-            User Outlook
-          </CardTitle>
-          <CardDescription>
-            Quick overview of all users and their trip status
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-6 w-6" />
+                User Outlook
+              </CardTitle>
+              <CardDescription>
+                Quick overview of all users and their trip status
+              </CardDescription>
+            </div>
+            <Button 
+              onClick={loadUsersFromCache} 
+              disabled={loading}
+              variant="outline"
+              size="sm"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Refresh Cache
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
-          {error && (
-            <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-md text-destructive">
-              Error: {error}
-            </div>
-          )}
           
           <div className="space-y-4">
             {users.map((user) => {
