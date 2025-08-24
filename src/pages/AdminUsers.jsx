@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, RefreshCw, Trash2, Edit, Mail, Calendar, Shield, MessageSquare } from 'lucide-react';
+import { Users, RefreshCw, Trash2, Edit, Mail, Calendar, Shield, MessageSquare, CheckSquare, Square } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
 import toast, { Toaster } from 'react-hot-toast';
@@ -7,6 +7,8 @@ import toast, { Toaster } from 'react-hot-toast';
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState(new Set());
+  const [selectAll, setSelectAll] = useState(false);
 
   const loadUsersFromCache = () => {
     setLoading(true);
@@ -88,6 +90,77 @@ TripWell Team`
       console.log('Message to send:', template);
       console.log('To user:', user.email);
       toast.success(`Message prepared for ${user.email}`);
+    }
+  };
+
+  // Checkbox handlers
+  const handleSelectUser = (userId) => {
+    const newSelected = new Set(selectedUsers);
+    if (newSelected.has(userId)) {
+      newSelected.delete(userId);
+    } else {
+      newSelected.add(userId);
+    }
+    setSelectedUsers(newSelected);
+    setSelectAll(newSelected.size === users.length);
+  };
+
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedUsers(new Set());
+      setSelectAll(false);
+    } else {
+      const allUserIds = users.map(user => user.userId);
+      setSelectedUsers(new Set(allUserIds));
+      setSelectAll(true);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedUsers.size === 0) {
+      toast.error('No users selected for deletion');
+      return;
+    }
+
+    const selectedUserList = users.filter(user => selectedUsers.has(user.userId));
+    const safeToDelete = selectedUserList.filter(user => getUserStatus(user).safeToDelete);
+    
+    if (safeToDelete.length !== selectedUserList.length) {
+      toast.error(`${selectedUserList.length - safeToDelete.length} selected users are not safe to delete`);
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete ${selectedUsers.size} users? This action cannot be undone.`)) {
+      return;
+    }
+
+    setLoading(true);
+    const deletePromises = Array.from(selectedUsers).map(userId =>
+      fetch(`https://gofastbackend.onrender.com/tripwell/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      })
+    );
+
+    try {
+      const results = await Promise.allSettled(deletePromises);
+      const successful = results.filter(result => result.status === 'fulfilled' && result.value.ok).length;
+      const failed = results.length - successful;
+
+      // Remove deleted users from local state
+      setUsers(users.filter(user => !selectedUsers.has(user.userId)));
+      setSelectedUsers(new Set());
+      setSelectAll(false);
+
+      if (failed > 0) {
+        toast.error(`Deleted ${successful} users, ${failed} failed`);
+      } else {
+        toast.success(`Successfully deleted ${successful} users`);
+      }
+    } catch (err) {
+      toast.error('Bulk delete failed: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -197,15 +270,28 @@ TripWell Team`
                 Manage user accounts, view profiles, and handle user data
               </CardDescription>
             </div>
-            <Button 
-              onClick={loadUsersFromCache} 
-              disabled={loading}
-              variant="outline"
-              size="sm"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Refresh Cache
-            </Button>
+            <div className="flex items-center gap-2">
+              {selectedUsers.size > 0 && (
+                <Button 
+                  onClick={handleBulkDelete}
+                  disabled={loading}
+                  variant="destructive"
+                  size="sm"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Selected ({selectedUsers.size})
+                </Button>
+              )}
+              <Button 
+                onClick={loadUsersFromCache} 
+                disabled={loading}
+                variant="outline"
+                size="sm"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                Refresh Cache
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -220,17 +306,57 @@ TripWell Team`
             </div>
           ) : (
             <div className="space-y-4">
-                             {users.map((user) => {
-                 const userStatus = getUserStatus(user);
-                 const tripStatus = getTripStatus(user);
-                 const daysSinceCreation = getDaysSinceCreation(user.createdAt);
+              {/* Select All Header */}
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
+                <button
+                  onClick={handleSelectAll}
+                  className="flex items-center gap-2 hover:bg-gray-100 p-1 rounded"
+                >
+                  {selectAll ? (
+                    <CheckSquare className="h-5 w-5 text-blue-600" />
+                  ) : (
+                    <Square className="h-5 w-5 text-gray-400" />
+                  )}
+                  <span className="text-sm font-medium">
+                    {selectAll ? 'Deselect All' : 'Select All'}
+                  </span>
+                </button>
+                {selectedUsers.size > 0 && (
+                  <span className="text-sm text-gray-600">
+                    {selectedUsers.size} of {users.length} selected
+                  </span>
+                )}
+              </div>
+
+              {users.map((user) => {
+                const userStatus = getUserStatus(user);
+                const tripStatus = getTripStatus(user);
+                const daysSinceCreation = getDaysSinceCreation(user.createdAt);
+                const isSelected = selectedUsers.has(user.userId);
+                const isSafeToDelete = userStatus.safeToDelete;
                 
                 return (
                   <div key={user.userId} className={`flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 ${
                     userStatus.safeToDelete ? 'border-red-200 bg-red-50' : 'border-green-200 bg-green-50'
-                  }`}>
+                  } ${isSelected ? 'ring-2 ring-blue-500' : ''}`}>
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
+                        {/* Checkbox */}
+                        <button
+                          onClick={() => handleSelectUser(user.userId)}
+                          disabled={!isSafeToDelete}
+                          className={`flex items-center gap-2 hover:bg-gray-100 p-1 rounded ${
+                            !isSafeToDelete ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          title={!isSafeToDelete ? 'User is not safe to delete' : 'Select for deletion'}
+                        >
+                          {isSelected ? (
+                            <CheckSquare className="h-5 w-5 text-blue-600" />
+                          ) : (
+                            <Square className="h-5 w-5 text-gray-400" />
+                          )}
+                        </button>
+                        
                         <div className="flex-shrink-0">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                             userStatus.safeToDelete ? 'bg-red-100' : 'bg-green-100'
