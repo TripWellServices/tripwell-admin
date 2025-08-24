@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AdminHome from './pages/AdminHome.jsx';
+import HydrateAllUsers from './pages/HydrateAllUsers.jsx';
 import AdminUsers from './pages/AdminUsers.jsx';
 import UserDashboard from './pages/UserDashboard.jsx';
 
@@ -10,6 +11,7 @@ function App() {
       <div className="min-h-screen bg-background">
         <Routes>
           <Route path="/" element={<AdminHome />} />
+          <Route path="/hydrate-users" element={<HydrateAllUsers />} />
           <Route path="/user-admin" element={<AdminUsers />} />
           <Route path="/user-dashboard" element={<UserDashboard />} />
         </Routes>

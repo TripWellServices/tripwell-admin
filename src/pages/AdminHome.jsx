@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, MapPin, BarChart3, Shield, LogIn } from 'lucide-react';
+import { Users, MapPin, BarChart3, Shield, LogIn, Database } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
 import { Input } from '../components/ui/input.jsx';
@@ -60,6 +60,13 @@ const AdminHome = () => {
   }, []);
 
   const navigationCards = [
+    {
+      title: 'Hydrate All Users',
+      description: 'Load all users from backend and cache them locally',
+      icon: <Database className="h-8 w-8" />,
+      route: '/hydrate-users',
+      color: 'bg-orange-50 border-orange-200 hover:bg-orange-100'
+    },
     {
       title: 'User Admin',
       description: 'Manage users, view profiles, and handle user data',

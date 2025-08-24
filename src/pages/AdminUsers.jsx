@@ -1,41 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { Users, RefreshCw, Trash2, Edit, Mail, Calendar, Shield } from 'lucide-react';
+import { Users, RefreshCw, Trash2, Edit, Mail, Calendar, Shield, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
-import { useAdminApi } from '../hooks/useAdminApi.js';
 import toast, { Toaster } from 'react-hot-toast';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
-  const { fetchUsers, deleteUser, loading, error } = useAdminApi();
+  const [loading, setLoading] = useState(false);
 
-  const loadUsers = async () => {
+  const loadUsersFromCache = () => {
+    setLoading(true);
     try {
-      const userData = await fetchUsers();
-      setUsers(userData);
-      toast.success(`Loaded ${userData.length} TripWell users`);
+      const hydratedUsers = localStorage.getItem('hydratedUsers');
+      if (hydratedUsers) {
+        const userData = JSON.parse(hydratedUsers);
+        setUsers(userData);
+        toast.success(`Loaded ${userData.length} users from cache`);
+      } else {
+        toast.error('No users found in cache. Please hydrate users first.');
+      }
     } catch (err) {
-      toast.error('Failed to load users: ' + err.message);
+      toast.error('Failed to load users from cache: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-      return;
-    }
-    
-    try {
-      await deleteUser(userId);
-      setUsers(users.filter(user => user.userId !== userId));
-      toast.success('User deleted successfully');
-    } catch (err) {
-      toast.error('Failed to delete user: ' + err.message);
-    }
+  const handleDeleteUser = (userId) => {
+    toast.info('Delete functionality coming soon!');
+    // TODO: Implement delete service
   };
 
   const handleModifyUser = (userId) => {
     toast.info('Modify user functionality coming soon!');
-    // TODO: Implement user modification modal/form
+    // TODO: Implement user modification
   };
 
   const formatDate = (dateString) => {
@@ -48,7 +46,7 @@ const AdminUsers = () => {
   };
 
   useEffect(() => {
-    loadUsers();
+    loadUsersFromCache();
   }, []);
 
   return (
@@ -68,23 +66,17 @@ const AdminUsers = () => {
               </CardDescription>
             </div>
             <Button 
-              onClick={loadUsers} 
+              onClick={loadUsersFromCache} 
               disabled={loading}
               variant="outline"
               size="sm"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
+              Refresh Cache
             </Button>
           </div>
         </CardHeader>
         <CardContent>
-          {error && (
-            <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-md text-destructive">
-              Error: {error}
-            </div>
-          )}
-          
           {loading ? (
             <div className="flex items-center justify-center p-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
