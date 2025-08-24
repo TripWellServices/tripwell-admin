@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Users, CheckCircle, RefreshCw, Database } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
-import { useAdminApi } from '../hooks/useAdminApi.js';
 import toast, { Toaster } from 'react-hot-toast';
 
 const HydrateAllUsers = () => {
   const [isHydrated, setIsHydrated] = useState(false);
   const [userCount, setUserCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const { fetchUsers, testConnection } = useAdminApi();
 
   // Check if users are already hydrated on component mount
   useEffect(() => {
@@ -24,7 +22,16 @@ const HydrateAllUsers = () => {
   const handleHydrateUsers = async () => {
     setLoading(true);
     try {
-      const users = await fetchUsers();
+      const response = await fetch('https://gofastbackend.onrender.com/tripwell/admin/users', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const users = await response.json();
       
       // Save to localStorage
       localStorage.setItem('hydratedUsers', JSON.stringify(users));
@@ -51,7 +58,16 @@ const HydrateAllUsers = () => {
 
   const handleTestConnection = async () => {
     try {
-      const result = await testConnection();
+      const response = await fetch('https://gofastbackend.onrender.com/tripwell/admin/test', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
       toast.success(`✅ Test successful: ${result.userCount} users found`);
       console.log('Test result:', result);
     } catch (err) {

@@ -26,9 +26,27 @@ const AdminUsers = () => {
     }
   };
 
-  const handleDeleteUser = (userId) => {
-    toast.info('Delete functionality coming soon!');
-    // TODO: Implement delete service
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://gofastbackend.onrender.com/tripwell/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Remove from local state
+      setUsers(users.filter(user => user.userId !== userId));
+      toast.success('User deleted successfully');
+    } catch (err) {
+      toast.error('Failed to delete user: ' + err.message);
+    }
   };
 
   const handleModifyUser = (userId) => {
