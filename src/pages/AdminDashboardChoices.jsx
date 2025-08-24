@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, MapPin, BarChart3, Database, RefreshCw, CheckCircle, LogOut } from 'lucide-react';
+import { Users, MapPin, BarChart3, Database, RefreshCw, CheckCircle, LogOut, MessageSquare } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
 import { useNavigate } from 'react-router-dom';
@@ -69,6 +69,13 @@ const AdminDashboardChoices = () => {
       icon: <Users className="h-8 w-8" />,
       route: '/user-admin',
       color: 'bg-blue-50 border-blue-200 hover:bg-blue-100'
+    },
+    {
+      title: 'Message Center',
+      description: 'Send targeted messages to users with templates',
+      icon: <MessageSquare className="h-8 w-8" />,
+      route: '/message-center',
+      color: 'bg-orange-50 border-orange-200 hover:bg-orange-100'
     },
     {
       title: 'User Dashboard',
