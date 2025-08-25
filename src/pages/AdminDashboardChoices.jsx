@@ -78,10 +78,10 @@ const AdminDashboardChoices = () => {
       color: 'bg-orange-50 border-orange-200 hover:bg-orange-100'
     },
     {
-      title: 'User Dashboard',
-      description: 'Quick overview of all users and their trip status',
+      title: 'User Journey',
+      description: 'Track user progression through TripWell experience',
       icon: <BarChart3 className="h-8 w-8" />,
-      route: '/user-dashboard',
+      route: '/user-journey',
       color: 'bg-green-50 border-green-200 hover:bg-green-100'
     },
     {

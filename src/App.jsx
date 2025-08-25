@@ -4,7 +4,7 @@ import AdminHome from './pages/AdminHome.jsx';
 import AdminDashboardChoices from './pages/AdminDashboardChoices.jsx';
 import AdminUsers from './pages/AdminUsers.jsx';
 import AdminMessageCenter from './pages/AdminMessageCenter.jsx';
-import UserDashboard from './pages/UserDashboard.jsx';
+import UserJourney from './pages/UserJourney.jsx';
 
 function App() {
   return (
@@ -15,7 +15,7 @@ function App() {
                            <Route path="/admin-dashboard" element={<AdminDashboardChoices />} />
                  <Route path="/user-admin" element={<AdminUsers />} />
                  <Route path="/message-center" element={<AdminMessageCenter />} />
-                 <Route path="/user-dashboard" element={<UserDashboard />} />
+                 <Route path="/user-journey" element={<UserJourney />} />
         </Routes>
       </div>
     </Router>
