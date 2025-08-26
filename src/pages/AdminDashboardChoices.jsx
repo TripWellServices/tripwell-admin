@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, MapPin, BarChart3, Database, RefreshCw, CheckCircle, LogOut, MessageSquare } from 'lucide-react';
+import { Users, MapPin, BarChart3, Database, RefreshCw, CheckCircle, LogOut, MessageSquare, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
 import { useNavigate } from 'react-router-dom';
@@ -79,17 +79,24 @@ const AdminDashboardChoices = () => {
     },
     {
       title: 'User Journey',
-      description: 'Track user progression through TripWell experience',
+      description: 'Track full app users through their TripWell experience',
       icon: <BarChart3 className="h-8 w-8" />,
       route: '/user-journey',
       color: 'bg-green-50 border-green-200 hover:bg-green-100'
+    },
+    {
+      title: 'Funnel Tracker',
+      description: 'Monitor demo users and conversion potential',
+      icon: <TrendingUp className="h-8 w-8" />,
+      route: '/funnel-tracker',
+      color: 'bg-purple-50 border-purple-200 hover:bg-purple-100'
     },
     {
       title: 'Trip Dashboard',
       description: 'Monitor active trips, planning status, and trip analytics',
       icon: <MapPin className="h-8 w-8" />,
       route: '/trip-dashboard',
-      color: 'bg-purple-50 border-purple-200 hover:bg-purple-100'
+      color: 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100'
     }
   ];
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, MapPin, TrendingUp, UserCheck, UserX, Calendar, Shield } from 'lucide-react';
+import { Users, MapPin, TrendingUp, UserCheck, UserX, Calendar, Shield, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
 import toast, { Toaster } from 'react-hot-toast';
@@ -14,8 +14,12 @@ const UserJourney = () => {
       const hydratedUsers = localStorage.getItem('hydratedUsers');
       if (hydratedUsers) {
         const userData = JSON.parse(hydratedUsers);
-        setUsers(userData);
-        toast.success(`Loaded ${userData.length} users from cache`);
+        // Filter to only full app users (full_app or none/legacy)
+        const fullAppUsers = userData.filter(user => 
+          !user.funnelStage || user.funnelStage === 'full_app' || user.funnelStage === 'none'
+        );
+        setUsers(fullAppUsers);
+        toast.success(`Loaded ${fullAppUsers.length} full app users from cache`);
       } else {
         toast.error('No users found in cache. Please hydrate users first.');
       }
@@ -125,8 +129,21 @@ const UserJourney = () => {
       <Toaster position="top-right" />
       
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">User Journey Overview</h1>
-        <p className="text-gray-600 mt-2">Track user progression through the TripWell experience</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">User Journey</h1>
+            <p className="text-gray-600 mt-2">Track full app users through their TripWell experience</p>
+          </div>
+          <Button 
+            onClick={loadUsersFromCache} 
+            disabled={loading}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Key Metrics Dashboard */}
@@ -139,7 +156,7 @@ const UserJourney = () => {
           <CardContent>
             <div className="text-2xl font-bold">{metrics?.totalUsers || 0}</div>
             <p className="text-xs text-muted-foreground">
-              All registered users
+              Full app users
             </p>
           </CardContent>
         </Card>
@@ -299,6 +316,63 @@ const UserJourney = () => {
                   ))}
                 </div>
               </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Full App Users List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Full App Users</CardTitle>
+          <CardDescription>
+            Showing {users.length} users in the full app experience
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center p-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <span className="ml-2">Loading users...</span>
+            </div>
+          ) : users.length === 0 ? (
+            <div className="text-center p-8 text-muted-foreground">
+              No full app users found.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {users.map((user) => {
+                const daysSinceCreation = getDaysSinceCreation(user.createdAt);
+                const userStatus = getUserStatus(user);
+                
+                return (
+                  <div key={user.userId} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${userStatus.color}`}>
+                        {userStatus.icon}
+                      </div>
+                      
+                      <div>
+                        <div className="font-medium text-gray-900">
+                          {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'No Name Set'}
+                        </div>
+                        <div className="text-sm text-gray-600">{user.email}</div>
+                        <div className="text-xs text-gray-500">
+                          Created {daysSinceCreation === 'Unknown' ? 'Unknown' : `${daysSinceCreation} days ago`}
+                          {user.profileComplete && ' • Profile Complete'}
+                          {user.tripId && ' • Has Trip'}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${userStatus.color}`}>
+                        {userStatus.label}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </CardContent>
