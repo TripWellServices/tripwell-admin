@@ -11,13 +11,14 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   const loadUsersFromAdmin = async () => {
     setLoading(true);
     
-    // Get admin credentials from localStorage
-    const adminUsername = localStorage.getItem('adminUsername') || 'admin';
-    const adminPassword = localStorage.getItem('adminPassword') || 'tripwell2025';
+    // Use hardcoded admin credentials for now
+    const adminUsername = 'admin';
+    const adminPassword = 'tripwell2025';
     
     console.log('🔄 Loading users from admin endpoint...');
     console.log('🔐 Using credentials:', { 
@@ -58,20 +59,24 @@ const AdminUsers = () => {
     }
   };
 
-  const handleDeleteUser = async (userId) => {
-    console.log('🗑️ Attempting to delete user:', userId);
+  const handleDeleteUser = async (user) => {
+    console.log('🗑️ Attempting to delete user:', user);
     
-    if (!window.confirm('Are you sure you want to delete this user?')) {
+    // Store the user to delete in state
+    setUserToDelete(user);
+    
+    if (!window.confirm(`Are you sure you want to delete ${user.firstName || user.email}?`)) {
+      setUserToDelete(null);
       return;
     }
 
-    // Get admin credentials from localStorage
-    const adminUsername = localStorage.getItem('adminUsername') || 'admin';
-    const adminPassword = localStorage.getItem('adminPassword') || 'tripwell2025';
+    // Use hardcoded admin credentials for now
+    const adminUsername = 'admin';
+    const adminPassword = 'tripwell2025';
 
     try {
-      console.log('🗑️ Sending DELETE request for user:', userId);
-      const response = await fetch(`https://gofastbackend.onrender.com/tripwell/admin/users/${userId}`, {
+      console.log('🗑️ Sending DELETE request for user:', user.userId);
+      const response = await fetch(`https://gofastbackend.onrender.com/tripwell/admin/delete/user/${user.userId}`, {
         method: 'DELETE',
         headers: { 
           'Content-Type': 'application/json',
@@ -84,12 +89,12 @@ const AdminUsers = () => {
       
       if (response.ok) {
         // Only remove from local state on successful deletion
-        setUsers(prevUsers => prevUsers.filter(user => user.userId !== userId));
-        toast.success('User deleted successfully');
+        setUsers(prevUsers => prevUsers.filter(u => u.userId !== user.userId));
+        toast.success(`User ${user.firstName || user.email} deleted successfully`);
         console.log('🗑️ User removed from frontend state');
       } else if (response.status === 404) {
         // User already deleted from database, remove from UI
-        setUsers(prevUsers => prevUsers.filter(user => user.userId !== userId));
+        setUsers(prevUsers => prevUsers.filter(u => u.userId !== user.userId));
         toast.success('User already deleted from database');
         console.log('🗑️ User was already deleted from database');
       } else {
@@ -100,6 +105,8 @@ const AdminUsers = () => {
     } catch (err) {
       console.error('🗑️ Delete error:', err);
       toast.error('Failed to delete user: ' + err.message);
+    } finally {
+      setUserToDelete(null);
     }
   };
 
@@ -180,12 +187,12 @@ TripWell Team`
 
     setLoading(true);
     
-    // Get admin credentials from localStorage
-    const adminUsername = localStorage.getItem('adminUsername') || 'admin';
-    const adminPassword = localStorage.getItem('adminPassword') || 'tripwell2025';
+    // Use hardcoded admin credentials for now
+    const adminUsername = 'admin';
+    const adminPassword = 'tripwell2025';
     
     const deletePromises = Array.from(selectedUsers).map(userId =>
-      fetch(`https://gofastbackend.onrender.com/tripwell/admin/users/${userId}`, {
+      fetch(`https://gofastbackend.onrender.com/tripwell/admin/delete/user/${userId}`, {
         method: 'DELETE',
         headers: { 
           'Content-Type': 'application/json',
@@ -497,11 +504,12 @@ TripWell Team`
                                                <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => handleDeleteUser(user.userId)}
+                          onClick={() => handleDeleteUser(user)}
                           title="Delete user"
+                          disabled={userToDelete?.userId === user.userId}
                         >
                           <Trash2 className="h-4 w-4 mr-1" />
-                          Delete
+                          {userToDelete?.userId === user.userId ? 'Deleting...' : 'Delete'}
                         </Button>
                      </div>
                   </div>
