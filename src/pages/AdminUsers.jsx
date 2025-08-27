@@ -19,6 +19,9 @@ const AdminUsers = () => {
     const adminUsername = localStorage.getItem('adminUsername') || 'admin';
     const adminPassword = localStorage.getItem('adminPassword') || 'tripwell2025';
     
+    console.log('🔄 Loading users from admin endpoint...');
+    console.log('🔐 Using credentials:', { username: adminUsername, password: adminPassword ? '***' : 'undefined' });
+    
     try {
       const response = await fetch('https://gofastbackend.onrender.com/tripwell/admin/hydrate', {
         method: 'GET',
@@ -29,14 +32,20 @@ const AdminUsers = () => {
         }
       });
 
+      console.log('📡 Response status:', response.status);
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const userData = await response.json();
+      console.log('📊 Received user data:', userData.length, 'users');
+      console.log('📊 User IDs:', userData.map(u => u.userId));
+      
       setUsers(userData);
       toast.success(`Loaded ${userData.length} users from server`);
     } catch (err) {
+      console.error('❌ Error loading users:', err);
       toast.error('Failed to load users: ' + err.message);
     } finally {
       setLoading(false);
@@ -44,6 +53,8 @@ const AdminUsers = () => {
   };
 
   const handleDeleteUser = async (userId) => {
+    console.log('🗑️ Attempting to delete user:', userId);
+    
     if (!window.confirm('Are you sure you want to delete this user?')) {
       return;
     }
@@ -53,6 +64,7 @@ const AdminUsers = () => {
     const adminPassword = localStorage.getItem('adminPassword') || 'tripwell2025';
 
     try {
+      console.log('🗑️ Sending DELETE request for user:', userId);
       const response = await fetch(`https://gofastbackend.onrender.com/tripwell/admin/users/${userId}`, {
         method: 'DELETE',
         headers: { 
@@ -62,14 +74,25 @@ const AdminUsers = () => {
         }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      console.log('🗑️ Response status:', response.status);
+      
+      if (response.ok) {
+        // Only remove from local state on successful deletion
+        setUsers(prevUsers => prevUsers.filter(user => user.userId !== userId));
+        toast.success('User deleted successfully');
+        console.log('🗑️ User removed from frontend state');
+      } else if (response.status === 404) {
+        // User already deleted from database, remove from UI
+        setUsers(prevUsers => prevUsers.filter(user => user.userId !== userId));
+        toast.success('User already deleted from database');
+        console.log('🗑️ User was already deleted from database');
+      } else {
+        const errorText = await response.text();
+        console.error('🗑️ Delete failed:', response.status, errorText);
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
-
-      // Remove from local state
-      setUsers(users.filter(user => user.userId !== userId));
-      toast.success('User deleted successfully');
     } catch (err) {
+      console.error('🗑️ Delete error:', err);
       toast.error('Failed to delete user: ' + err.message);
     }
   };
@@ -168,8 +191,25 @@ TripWell Team`
 
     try {
       const results = await Promise.allSettled(deletePromises);
-      const successful = results.filter(result => result.status === 'fulfilled' && result.value.ok).length;
-      const failed = results.length - successful;
+      
+      // Count successful deletions and 404s (already deleted)
+      let successful = 0;
+      let alreadyDeleted = 0;
+      let failed = 0;
+      
+      results.forEach(result => {
+        if (result.status === 'fulfilled') {
+          if (result.value.ok) {
+            successful++;
+          } else if (result.value.status === 404) {
+            alreadyDeleted++;
+          } else {
+            failed++;
+          }
+        } else {
+          failed++;
+        }
+      });
 
       // Remove deleted users from local state
       setUsers(users.filter(user => !selectedUsers.has(user.userId)));
@@ -177,7 +217,9 @@ TripWell Team`
       setSelectAll(false);
 
       if (failed > 0) {
-        toast.error(`Deleted ${successful} users, ${failed} failed`);
+        toast.error(`Deleted ${successful} users, ${alreadyDeleted} already deleted, ${failed} failed`);
+      } else if (alreadyDeleted > 0) {
+        toast.success(`Deleted ${successful} users, ${alreadyDeleted} already deleted`);
       } else {
         toast.success(`Successfully deleted ${successful} users`);
       }
