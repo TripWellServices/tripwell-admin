@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
-import Login from './pages/Login';
+import AdminHome from './pages/AdminHome';
 import AdminDashboardChoices from './pages/AdminDashboardChoices';
 import AdminUsers from './pages/AdminUsers';
 import UserJourney from './pages/UserJourney';
@@ -15,7 +15,7 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<AdminHome />} />
           <Route path="/admin" element={<ProtectedRoute><AdminDashboardChoices /></ProtectedRoute>} />
           <Route path="/user-admin" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
           <Route path="/user-journey" element={<ProtectedRoute><UserJourney /></ProtectedRoute>} />

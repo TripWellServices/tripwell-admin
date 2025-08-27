@@ -5,9 +5,11 @@ import { Button } from '../components/ui/button.jsx';
 import { Input } from '../components/ui/input.jsx';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const AdminHome = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,23 +21,13 @@ const AdminHome = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('https://gofastbackend.onrender.com/tripwell/admin/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
+      const result = await login(username, password);
+      
+      if (result.success) {
         toast.success('Welcome to TripWell Admin!');
-        localStorage.setItem('adminLoggedIn', 'true');
-        // Redirect to admin dashboard
-        navigate('/admin-dashboard');
+        navigate('/admin');
       } else {
-        toast.error(data.error || 'Invalid credentials');
+        toast.error(result.error || 'Invalid credentials');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -49,7 +41,7 @@ const AdminHome = () => {
   useEffect(() => {
     const loggedIn = localStorage.getItem('adminLoggedIn');
     if (loggedIn) {
-      navigate('/admin-dashboard');
+      navigate('/admin');
     }
   }, [navigate]);
 

@@ -1,6 +1,4 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from '../firebase.js';
-import { onAuthStateChanged } from 'firebase/auth';
 
 const AuthContext = createContext();
 
@@ -18,33 +16,53 @@ export const AuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      
-      if (user) {
-        try {
-          // Get the user's custom claims to check if they're an admin
-          const token = await user.getIdTokenResult();
-          setIsAdmin(token.claims.role === 'admin');
-        } catch (error) {
-          console.error('Error checking admin status:', error);
-          setIsAdmin(false);
-        }
-      } else {
-        setIsAdmin(false);
-      }
-      
-      setLoading(false);
-    });
-
-    return unsubscribe;
+    // Check if admin is logged in via localStorage
+    const adminLoggedIn = localStorage.getItem('adminLoggedIn');
+    if (adminLoggedIn === 'true') {
+      setUser({ username: 'admin' }); // Simple user object
+      setIsAdmin(true);
+    }
+    setLoading(false);
   }, []);
+
+  const login = async (username, password) => {
+    try {
+      const response = await fetch('https://gofastbackend.onrender.com/tripwell/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setUser({ username });
+        setIsAdmin(true);
+        localStorage.setItem('adminLoggedIn', 'true');
+        return { success: true };
+      } else {
+        return { success: false, error: data.error || 'Invalid credentials' };
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      return { success: false, error: 'Failed to connect to server' };
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    setIsAdmin(false);
+    localStorage.removeItem('adminLoggedIn');
+  };
 
   const value = {
     user,
     loading,
     isAdmin,
-    auth
+    login,
+    logout
   };
 
   return (

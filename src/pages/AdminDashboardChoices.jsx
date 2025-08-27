@@ -4,9 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button.jsx';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const AdminDashboardChoices = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [isHydrated, setIsHydrated] = useState(false);
   const [userCount, setUserCount] = useState(0);
   const [hydrating, setHydrating] = useState(false);
@@ -50,7 +52,7 @@ const AdminDashboardChoices = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminLoggedIn');
+    logout();
     localStorage.removeItem('hydratedUsers');
     localStorage.removeItem('lastHydrated');
     toast.success('Logged out successfully');
