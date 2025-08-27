@@ -41,6 +41,8 @@ export const AuthProvider = ({ children }) => {
         setUser({ username });
         setIsAdmin(true);
         localStorage.setItem('adminLoggedIn', 'true');
+        localStorage.setItem('adminUsername', username);
+        localStorage.setItem('adminPassword', password);
         return { success: true };
       } else {
         return { success: false, error: data.error || 'Invalid credentials' };
@@ -55,6 +57,8 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setIsAdmin(false);
     localStorage.removeItem('adminLoggedIn');
+    localStorage.removeItem('adminUsername');
+    localStorage.removeItem('adminPassword');
   };
 
   const value = {

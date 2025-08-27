@@ -3,26 +3,41 @@ import { Users, RefreshCw, Trash2, Edit, Mail, Calendar, Shield, MessageSquare, 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
 import toast, { Toaster } from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 
 const AdminUsers = () => {
+  const { isAdmin } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
 
-  const loadUsersFromCache = () => {
+  const loadUsersFromAdmin = async () => {
     setLoading(true);
+    
+    // Get admin credentials from localStorage
+    const adminUsername = localStorage.getItem('adminUsername') || 'admin';
+    const adminPassword = localStorage.getItem('adminPassword') || 'tripwell2025';
+    
     try {
-      const hydratedUsers = localStorage.getItem('hydratedUsers');
-      if (hydratedUsers) {
-        const userData = JSON.parse(hydratedUsers);
-        setUsers(userData);
-        toast.success(`Loaded ${userData.length} users from cache`);
-      } else {
-        toast.error('No users found in cache. Please hydrate users first.');
+      const response = await fetch('https://gofastbackend.onrender.com/tripwell/admin/hydrate', {
+        method: 'GET',
+        headers: { 
+          'Content-Type': 'application/json',
+          'username': adminUsername,
+          'password': adminPassword
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const userData = await response.json();
+      setUsers(userData);
+      toast.success(`Loaded ${userData.length} users from server`);
     } catch (err) {
-      toast.error('Failed to load users from cache: ' + err.message);
+      toast.error('Failed to load users: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -33,10 +48,18 @@ const AdminUsers = () => {
       return;
     }
 
+    // Get admin credentials from localStorage
+    const adminUsername = localStorage.getItem('adminUsername') || 'admin';
+    const adminPassword = localStorage.getItem('adminPassword') || 'tripwell2025';
+
     try {
       const response = await fetch(`https://gofastbackend.onrender.com/tripwell/admin/users/${userId}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'username': adminUsername,
+          'password': adminPassword
+        }
       });
 
       if (!response.ok) {
@@ -127,10 +150,19 @@ TripWell Team`
     }
 
     setLoading(true);
+    
+    // Get admin credentials from localStorage
+    const adminUsername = localStorage.getItem('adminUsername') || 'admin';
+    const adminPassword = localStorage.getItem('adminPassword') || 'tripwell2025';
+    
     const deletePromises = Array.from(selectedUsers).map(userId =>
       fetch(`https://gofastbackend.onrender.com/tripwell/admin/users/${userId}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'username': adminUsername,
+          'password': adminPassword
+        }
       })
     );
 
@@ -243,7 +275,7 @@ TripWell Team`
   };
 
   useEffect(() => {
-    loadUsersFromCache();
+    loadUsersFromAdmin();
   }, []);
 
   return (
@@ -288,13 +320,13 @@ TripWell Team`
                 Select All
               </Button>
               <Button 
-                onClick={loadUsersFromCache} 
+                onClick={loadUsersFromAdmin} 
                 disabled={loading}
                 variant="outline"
                 size="sm"
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Refresh Cache
+                Refresh Users
               </Button>
             </div>
           </div>
