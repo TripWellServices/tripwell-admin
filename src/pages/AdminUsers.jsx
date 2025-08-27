@@ -122,14 +122,6 @@ TripWell Team`
       return;
     }
 
-    const selectedUserList = users.filter(user => selectedUsers.has(user.userId));
-    const safeToDelete = selectedUserList.filter(user => getUserStatus(user).safeToDelete);
-    
-    if (safeToDelete.length !== selectedUserList.length) {
-      toast.error(`${selectedUserList.length - safeToDelete.length} selected users are not safe to delete`);
-      return;
-    }
-
     if (!window.confirm(`Are you sure you want to delete ${selectedUsers.size} users? This action cannot be undone.`)) {
       return;
     }
@@ -283,6 +275,19 @@ TripWell Team`
                 </Button>
               )}
               <Button 
+                onClick={() => {
+                  const allUserIds = users.map(user => user.userId);
+                  setSelectedUsers(new Set(allUserIds));
+                  setSelectAll(true);
+                }}
+                disabled={loading || users.length === 0}
+                variant="outline"
+                size="sm"
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                Select All
+              </Button>
+              <Button 
                 onClick={loadUsersFromCache} 
                 disabled={loading}
                 variant="outline"
@@ -335,21 +340,18 @@ TripWell Team`
                 const isSelected = selectedUsers.has(user.userId);
                 const isSafeToDelete = userStatus.safeToDelete;
                 
-                return (
-                  <div key={user.userId} className={`flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 ${
-                    userStatus.safeToDelete ? 'border-red-200 bg-red-50' : 'border-green-200 bg-green-50'
-                  } ${isSelected ? 'ring-2 ring-blue-500' : ''}`}>
+                                 return (
+                   <div key={user.userId} className={`flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 ${
+                     isSelected ? 'ring-2 ring-blue-500' : ''
+                   }`}>
                     <div className="flex-1">
                       <div className="flex items-center gap-3">
-                        {/* Checkbox */}
-                        <button
-                          onClick={() => handleSelectUser(user.userId)}
-                          disabled={!isSafeToDelete}
-                          className={`flex items-center gap-2 hover:bg-gray-100 p-1 rounded ${
-                            !isSafeToDelete ? 'opacity-50 cursor-not-allowed' : ''
-                          }`}
-                          title={!isSafeToDelete ? 'User is not safe to delete' : 'Select for deletion'}
-                        >
+                                                 {/* Checkbox */}
+                         <button
+                           onClick={() => handleSelectUser(user.userId)}
+                           className="flex items-center gap-2 hover:bg-gray-100 p-1 rounded"
+                           title="Select for deletion"
+                         >
                           {isSelected ? (
                             <CheckSquare className="h-5 w-5 text-blue-600" />
                           ) : (
@@ -357,15 +359,11 @@ TripWell Team`
                           )}
                         </button>
                         
-                        <div className="flex-shrink-0">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            userStatus.safeToDelete ? 'bg-red-100' : 'bg-green-100'
-                          }`}>
-                            <Mail className={`h-5 w-5 ${
-                              userStatus.safeToDelete ? 'text-red-600' : 'text-green-600'
-                            }`} />
-                          </div>
-                        </div>
+                                                 <div className="flex-shrink-0">
+                           <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100">
+                             <Mail className="h-5 w-5 text-gray-600" />
+                           </div>
+                         </div>
                                                  <div className="flex-1">
                            <div className="font-medium text-gray-900">
                              {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'No Name Set'}
@@ -393,11 +391,7 @@ TripWell Team`
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${tripStatus.color}`}>
                                 {tripStatus.label}
                               </span>
-                              {userStatus.safeToDelete && (
-                                <span className="text-xs text-red-600 font-medium">
-                                  ⚠️ Safe to delete: {userStatus.reason}
-                                </span>
-                              )}
+                              
                             </div>
                           </div>
                         </div>
@@ -420,16 +414,15 @@ TripWell Team`
                          <Edit className="h-4 w-4 mr-1" />
                          Modify
                        </Button>
-                       <Button
-                         variant={userStatus.safeToDelete ? "destructive" : "outline"}
-                         size="sm"
-                         onClick={() => handleDeleteUser(user.userId)}
-                         disabled={!userStatus.safeToDelete}
-                         title={userStatus.safeToDelete ? "Delete user" : "User is active - not safe to delete"}
-                       >
-                         <Trash2 className="h-4 w-4 mr-1" />
-                         {userStatus.safeToDelete ? 'Delete' : 'Protected'}
-                       </Button>
+                                               <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteUser(user.userId)}
+                          title="Delete user"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
                      </div>
                   </div>
                 );
