@@ -45,6 +45,11 @@ const AdminHome = () => {
     }
   }, [navigate]);
 
+  const handleForceLogout = () => {
+    localStorage.removeItem('adminLoggedIn');
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Toaster position="top-right" />
@@ -96,6 +101,16 @@ const AdminHome = () => {
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
+          
+          {/* Force Logout Button */}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <button 
+              onClick={handleForceLogout}
+              className="w-full text-sm text-gray-500 hover:text-gray-700 underline"
+            >
+              Clear login state
+            </button>
+          </div>
         </CardContent>
       </Card>
     </div>
