@@ -16,26 +16,14 @@ const AdminUsers = () => {
   const loadUsersFromAdmin = async () => {
     setLoading(true);
     
-    // Use hardcoded admin credentials for now
-    const adminUsername = 'admin';
-    const adminPassword = 'tripwell2025';
-    
     console.log('🔄 Loading users from admin endpoint...');
-    console.log('🔐 Using credentials:', { 
-      username: adminUsername, 
-      password: adminPassword ? '***' : 'undefined',
-      hasUsername: !!adminUsername,
-      hasPassword: !!adminPassword
-    });
     
     try {
       console.log('🔄 Calling URL:', 'https://gofastbackend.onrender.com/tripwell/admin/users');
       const response = await fetch('https://gofastbackend.onrender.com/tripwell/admin/users', {
         method: 'GET',
         headers: { 
-          'Content-Type': 'application/json',
-          'username': adminUsername,
-          'password': adminPassword
+          'Content-Type': 'application/json'
         }
       });
 
@@ -70,18 +58,12 @@ const AdminUsers = () => {
       return;
     }
 
-    // Use hardcoded admin credentials for now
-    const adminUsername = 'admin';
-    const adminPassword = 'tripwell2025';
-
     try {
       console.log('🗑️ Sending DELETE request for user:', user.userId);
       const response = await fetch(`https://gofastbackend.onrender.com/tripwell/admin/delete/user/${user.userId}`, {
         method: 'DELETE',
         headers: { 
-          'Content-Type': 'application/json',
-          'username': adminUsername,
-          'password': adminPassword
+          'Content-Type': 'application/json'
         }
       });
 
@@ -187,17 +169,11 @@ TripWell Team`
 
     setLoading(true);
     
-    // Use hardcoded admin credentials for now
-    const adminUsername = 'admin';
-    const adminPassword = 'tripwell2025';
-    
     const deletePromises = Array.from(selectedUsers).map(userId =>
       fetch(`https://gofastbackend.onrender.com/tripwell/admin/delete/user/${userId}`, {
         method: 'DELETE',
         headers: { 
-          'Content-Type': 'application/json',
-          'username': adminUsername,
-          'password': adminPassword
+          'Content-Type': 'application/json'
         }
       })
     );

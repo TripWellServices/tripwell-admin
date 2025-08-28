@@ -18,7 +18,9 @@ const AdminDashboardChoices = () => {
     try {
       const response = await fetch('https://gofastbackend.onrender.com/tripwell/admin/users', {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.ok) {
