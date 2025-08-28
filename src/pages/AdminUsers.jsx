@@ -72,13 +72,25 @@ const AdminUsers = () => {
       if (response.ok) {
         // Only remove from local state on successful deletion
         setUsers(prevUsers => prevUsers.filter(u => u.userId !== user.userId));
+        // Also remove from selected users to clean up bulk delete state
+        setSelectedUsers(prevSelected => {
+          const newSelected = new Set(prevSelected);
+          newSelected.delete(user.userId);
+          return newSelected;
+        });
         toast.success(`User ${user.firstName || user.email} deleted successfully`);
-        console.log('🗑️ User removed from frontend state');
+        console.log('🗑️ User removed from frontend state and selection');
       } else if (response.status === 404) {
         // User already deleted from database, remove from UI
         setUsers(prevUsers => prevUsers.filter(u => u.userId !== user.userId));
+        // Also remove from selected users to clean up bulk delete state
+        setSelectedUsers(prevSelected => {
+          const newSelected = new Set(prevSelected);
+          newSelected.delete(user.userId);
+          return newSelected;
+        });
         toast.success('User already deleted from database');
-        console.log('🗑️ User was already deleted from database');
+        console.log('🗑️ User was already deleted from database and selection');
       } else {
         const errorText = await response.text();
         console.error('🗑️ Delete failed:', response.status, errorText);
