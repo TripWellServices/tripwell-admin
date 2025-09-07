@@ -14,9 +14,48 @@ const Usertest = () => {
   const [loading, setLoading] = useState(false);
   const [pythonLoading, setPythonLoading] = useState(false);
   const [pythonResponse, setPythonResponse] = useState(null);
+  const [allUsers, setAllUsers] = useState([]);
 
   // Python service URL - adjust as needed
-  const PYTHON_SERVICE_URL = 'http://localhost:5000'; // Change to your Python service URL
+  const PYTHON_SERVICE_URL = 'https://tripwell-ai.onrender.com'; // Change to your Python service URL
+
+  // Auto-load users on component mount
+  const loadAllUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('https://gofastbackend.onrender.com/tripwell/admin/users', {
+        method: 'GET',
+        headers: { 
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const users = await response.json();
+      setAllUsers(users);
+      
+      // Auto-select the first user for testing
+      if (users.length > 0) {
+        const firstUser = users[0];
+        setUserData(firstUser);
+        setSearchEmail(firstUser.email);
+        toast.success(`Auto-loaded user: ${firstUser.firstName || 'No name'} (${firstUser.email})`);
+        
+        // Automatically analyze with Python service
+        await analyzeUserWithPython(firstUser);
+      } else {
+        toast.info('No users found in the system');
+      }
+    } catch (err) {
+      console.error('❌ Error loading users:', err);
+      toast.error('Failed to load users: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const searchUser = async () => {
     if (!searchEmail.trim()) {
@@ -32,19 +71,6 @@ const Usertest = () => {
     try {
       console.log('🔍 Searching for user:', searchEmail);
       
-      // Search in the Node.js backend first
-      const response = await fetch('https://gofastbackend.onrender.com/tripwell/admin/users', {
-        method: 'GET',
-        headers: { 
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const allUsers = await response.json();
       const foundUser = allUsers.find(user => 
         user.email.toLowerCase() === searchEmail.toLowerCase()
       );
@@ -112,6 +138,8 @@ const Usertest = () => {
 
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('❌ Python service error:', response.status, errorText);
+        toast.error(`Python service error: ${response.status} - ${errorText}`);
         throw new Error(`Python service error: ${response.status} - ${errorText}`);
       }
 
@@ -128,6 +156,16 @@ const Usertest = () => {
     } catch (err) {
       console.error('❌ Error analyzing with Python:', err);
       toast.error('Python analysis failed: ' + err.message);
+      setPythonResponse({
+        success: false,
+        error: err.message,
+        user_state: {
+          journey_stage: 'error',
+          user_state: 'error', 
+          engagement_level: 'error',
+          trip_status: 'error'
+        }
+      });
     } finally {
       setPythonLoading(false);
     }
@@ -141,6 +179,11 @@ const Usertest = () => {
 
     await analyzeUserWithPython(userData);
   };
+
+  // Auto-load users on component mount
+  useEffect(() => {
+    loadAllUsers();
+  }, []);
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -196,34 +239,60 @@ const Usertest = () => {
         </CardHeader>
       </Card>
 
-      {/* Search Section */}
+      {/* User Selection Section */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            User Lookup
+            User Selection
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4 items-end">
-            <div className="flex-1">
-              <label className="block text-sm font-medium mb-2">Email Address</label>
-              <Input
-                type="email"
-                placeholder="Enter user email..."
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Select User</label>
+              <select
+                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 value={searchEmail}
-                onChange={(e) => setSearchEmail(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && searchUser()}
-              />
+                onChange={(e) => {
+                  setSearchEmail(e.target.value);
+                  if (e.target.value) {
+                    const selectedUser = allUsers.find(user => user.email === e.target.value);
+                    if (selectedUser) {
+                      setUserData(selectedUser);
+                      analyzeUserWithPython(selectedUser);
+                    }
+                  }
+                }}
+              >
+                <option value="">Choose a user...</option>
+                {allUsers.map((user) => (
+                  <option key={user.userId} value={user.email}>
+                    {user.firstName} {user.lastName} ({user.email}) - {user.funnelStage}
+                  </option>
+                ))}
+              </select>
             </div>
-            <Button 
-              onClick={searchUser} 
-              disabled={loading}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'Searching...' : 'Search User'}
-            </Button>
+            <div className="flex gap-4 items-end">
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-2">Or Enter Email</label>
+                <Input
+                  type="email"
+                  placeholder="Enter user email..."
+                  value={searchEmail}
+                  onChange={(e) => setSearchEmail(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && searchUser()}
+                />
+              </div>
+              <Button 
+                onClick={searchUser} 
+                disabled={loading}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                {loading ? 'Searching...' : 'Search User'}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
