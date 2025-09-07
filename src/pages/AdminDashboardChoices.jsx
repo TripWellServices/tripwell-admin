@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, MapPin, BarChart3, Database, RefreshCw, CheckCircle, LogOut, MessageSquare, TrendingUp } from 'lucide-react';
+import { Users, MapPin, BarChart3, Database, RefreshCw, CheckCircle, LogOut, MessageSquare, TrendingUp, Brain } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
 import { useNavigate } from 'react-router-dom';
@@ -101,6 +101,13 @@ const AdminDashboardChoices = () => {
       icon: <MapPin className="h-8 w-8" />,
       route: '/trip-dashboard',
       color: 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100'
+    },
+    {
+      title: 'User State Testing',
+      description: 'Test Python user analysis and state management',
+      icon: <Brain className="h-8 w-8" />,
+      route: '/usertest',
+      color: 'bg-yellow-50 border-yellow-200 hover:bg-yellow-100'
     }
   ];
 
