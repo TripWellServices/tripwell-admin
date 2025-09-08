@@ -21,42 +21,18 @@ const Usertest = () => {
   const NODE_BACKEND_URL = getApiUrl('node');
   const PYTHON_SERVICE_URL = getApiUrl('python');
 
-  // Auto-load users on component mount
-  const loadAllUsers = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${NODE_BACKEND_URL}/tripwell/admin/users`, {
-        method: 'GET',
-        headers: { 
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const users = await response.json();
-      setAllUsers(users);
-      
-      // Auto-select the first user for testing
-      if (users.length > 0) {
-        const firstUser = users[0];
-        setUserData(firstUser);
-        setSearchEmail(firstUser.email);
-        toast.success(`Auto-loaded user: ${firstUser.firstName || 'No name'} (${firstUser.email})`);
-        
-        // Automatically analyze with Python service
-        await analyzeUserWithPython(firstUser);
-      } else {
-        toast.info('No users found in the system');
-      }
-    } catch (err) {
-      console.error('❌ Error loading users:', err);
-      toast.error('Failed to load users: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
+  // Adam Cole test user data
+  const adamCole = {
+    userId: "68afbb8f589d5d4958b151a2",
+    firebaseId: "test-firebase-id",
+    email: "adam.cole.0524@gmail.com",
+    firstName: "Adam",
+    lastName: "Cole",
+    profileComplete: true,
+    tripId: null,
+    funnelStage: "full_app",
+    createdAt: "2025-08-27T22:14:00Z",
+    role: "noroleset"
   };
 
   const searchUser = async () => {
@@ -182,9 +158,9 @@ const Usertest = () => {
     await analyzeUserWithPython(userData);
   };
 
-  // Auto-load users on component mount
+  // Set Adam Cole as the test user on mount
   useEffect(() => {
-    loadAllUsers();
+    setUserData(adamCole);
   }, []);
 
   const formatDate = (dateString) => {
@@ -241,60 +217,32 @@ const Usertest = () => {
         </CardHeader>
       </Card>
 
-      {/* User Selection Section */}
+      {/* Adam Cole Test User */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            User Selection
+            Adam Cole - Test User
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="flex items-center justify-between">
             <div>
-              <label className="block text-sm font-medium mb-2">Select User</label>
-              <select
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={searchEmail}
-                onChange={(e) => {
-                  setSearchEmail(e.target.value);
-                  if (e.target.value) {
-                    const selectedUser = allUsers.find(user => user.email === e.target.value);
-                    if (selectedUser) {
-                      setUserData(selectedUser);
-                      analyzeUserWithPython(selectedUser);
-                    }
-                  }
-                }}
-              >
-                <option value="">Choose a user...</option>
-                {allUsers.map((user) => (
-                  <option key={user.userId} value={user.email}>
-                    {user.firstName} {user.lastName} ({user.email}) - {user.funnelStage}
-                  </option>
-                ))}
-              </select>
+              <p className="text-sm text-gray-600">
+                <strong>Adam Cole</strong> (adam.cole.0524@gmail.com)
+              </p>
+              <p className="text-xs text-gray-500">
+                Funnel Stage: full_app | Profile: Complete | Trip: None
+              </p>
             </div>
-            <div className="flex gap-4 items-end">
-              <div className="flex-1">
-                <label className="block text-sm font-medium mb-2">Or Enter Email</label>
-                <Input
-                  type="email"
-                  placeholder="Enter user email..."
-                  value={searchEmail}
-                  onChange={(e) => setSearchEmail(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && searchUser()}
-                />
-              </div>
-              <Button 
-                onClick={searchUser} 
-                disabled={loading}
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                {loading ? 'Searching...' : 'Search User'}
-              </Button>
-            </div>
+            <Button 
+              onClick={() => analyzeUserWithPython(adamCole)} 
+              disabled={pythonLoading}
+              className="flex items-center gap-2"
+            >
+              <Brain className={`h-4 w-4 ${pythonLoading ? 'animate-pulse' : ''}`} />
+              {pythonLoading ? 'Analyzing...' : 'Have Python Analyze'}
+            </Button>
           </div>
         </CardContent>
       </Card>
