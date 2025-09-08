@@ -106,7 +106,7 @@ const Usertest = () => {
 
       console.log('📤 Sending to Python service:', analysisRequest);
 
-      const response = await fetch('/analyze-user', {
+      const response = await fetch(`${NODE_BACKEND_URL}/tripwell/admin/analyze-user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
