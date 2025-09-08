@@ -10,6 +10,14 @@ export default defineConfig({
       '/tripwell/admin': {
         target: 'https://gofastbackend.onrender.com',
         changeOrigin: true,
+      },
+      '/analyze-user': {
+        target: 'https://tripwell-ai.onrender.com',
+        changeOrigin: true,
+      },
+      '/test-interpret-user': {
+        target: 'https://tripwell-ai.onrender.com',
+        changeOrigin: true,
       }
     }
   }

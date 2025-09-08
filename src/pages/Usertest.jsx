@@ -5,6 +5,7 @@ import { Button } from '../components/ui/button.jsx';
 import { Input } from '../components/ui/input.jsx';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
+import { getApiUrl } from '../config.js';
 
 const Usertest = () => {
   const { isAdmin } = useAuth();
@@ -16,14 +17,15 @@ const Usertest = () => {
   const [pythonResponse, setPythonResponse] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
 
-  // Python service URL - adjust as needed
-  const PYTHON_SERVICE_URL = 'https://tripwell-ai.onrender.com'; // Change to your Python service URL
+  // Get API URLs from config
+  const NODE_BACKEND_URL = getApiUrl('node');
+  const PYTHON_SERVICE_URL = getApiUrl('python');
 
   // Auto-load users on component mount
   const loadAllUsers = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://gofastbackend.onrender.com/tripwell/admin/users', {
+      const response = await fetch(`${NODE_BACKEND_URL}/tripwell/admin/users`, {
         method: 'GET',
         headers: { 
           'Content-Type': 'application/json'
@@ -128,7 +130,7 @@ const Usertest = () => {
 
       console.log('📤 Sending to Python service:', analysisRequest);
 
-      const response = await fetch(`${PYTHON_SERVICE_URL}/analyze-user`, {
+      const response = await fetch('/analyze-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
