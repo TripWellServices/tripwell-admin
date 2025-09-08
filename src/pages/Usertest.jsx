@@ -106,7 +106,7 @@ const Usertest = () => {
 
       console.log('📤 Sending to Python service:', analysisRequest);
 
-      const response = await fetch(`${NODE_BACKEND_URL}/tripwell/admin/analyze-user`, {
+      const response = await fetch(`${NODE_BACKEND_URL}/tripwell/analyze-user`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -128,6 +128,9 @@ const Usertest = () => {
       
       if (result.success) {
         toast.success(`Python analysis complete! ${result.actions_taken?.length || 0} actions taken.`);
+        
+        // Fetch updated user data from MongoDB to verify the update
+        await fetchUpdatedUserData(user.userId);
       } else {
         toast.error('Python analysis failed: ' + result.message);
       }
@@ -146,6 +149,27 @@ const Usertest = () => {
       });
     } finally {
       setPythonLoading(false);
+    }
+  };
+
+  const fetchUpdatedUserData = async (userId) => {
+    try {
+      console.log('🔄 Fetching updated user data from MongoDB for:', userId);
+      
+      const response = await fetch(`${NODE_BACKEND_URL}/tripwell/get-user/${userId}`);
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('✅ Updated user data from MongoDB:', result.user);
+        setUserData(result.user);
+        toast.success('User data refreshed from MongoDB!');
+      } else {
+        console.error('❌ Failed to fetch updated user data:', result.error);
+        toast.error('Failed to fetch updated user data: ' + result.error);
+      }
+    } catch (err) {
+      console.error('❌ Error fetching updated user data:', err);
+      toast.error('Failed to fetch updated user data: ' + err.message);
     }
   };
 
