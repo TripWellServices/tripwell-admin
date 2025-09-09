@@ -450,12 +450,6 @@ TripWell Team`
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${userStatus.color}`}>
                                 {userStatus.label}
                               </span>
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${tripStatus.color}`}>
-                                {tripStatus.label}
-                              </span>
-                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                {user.journeyStage || 'new_user'}
-                              </span>
                             </div>
                           </div>
                         </div>

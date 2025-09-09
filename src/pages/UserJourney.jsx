@@ -21,7 +21,7 @@ const UserJourney = () => {
         setUsers(fullAppUsers);
         toast.success(`Loaded ${fullAppUsers.length} full app users from cache`);
       } else {
-        toast.error('No users found in cache. Please hydrate users first.');
+        toast.error('No users found in cache. Please hydrate users first from the main dashboard.');
       }
     } catch (err) {
       toast.error('Failed to load users from cache: ' + err.message);
@@ -74,48 +74,46 @@ const UserJourney = () => {
   };
 
   const getUserStatus = (user) => {
-    const daysSinceCreation = getDaysSinceCreation(user.createdAt);
-    const isNewAccount = daysSinceCreation <= 15;
-    const hasProfile = user.profileComplete;
-    const hasTrip = !!user.tripId;
+    // ✅ Use Python-interpreted user state instead of custom logic
+    const pythonUserState = user.userState || 'active';
     
-    if (hasTrip) {
-      return { 
-        label: 'Active User', 
-        color: 'bg-green-100 text-green-800',
-        icon: <UserCheck className="h-4 w-4" />
-      };
+    // Map Python user states to display
+    switch (pythonUserState) {
+      case 'active':
+        return { 
+          label: 'Active', 
+          color: 'bg-green-100 text-green-800',
+          icon: <UserCheck className="h-4 w-4" />
+        };
+      
+      case 'demo':
+        return { 
+          label: 'Demo User', 
+          color: 'bg-blue-100 text-blue-800',
+          icon: <Calendar className="h-4 w-4" />
+        };
+      
+      case 'inactive':
+        return { 
+          label: 'Inactive', 
+          color: 'bg-orange-100 text-orange-800',
+          icon: <UserX className="h-4 w-4" />
+        };
+      
+      case 'abandoned':
+        return { 
+          label: 'Abandoned', 
+          color: 'bg-red-100 text-red-800',
+          icon: <UserX className="h-4 w-4" />
+        };
+      
+      default:
+        return { 
+          label: 'Unknown', 
+          color: 'bg-gray-100 text-gray-800',
+          icon: <Shield className="h-4 w-4" />
+        };
     }
-    
-    if (hasProfile && isNewAccount) {
-      return { 
-        label: 'New User', 
-        color: 'bg-blue-100 text-blue-800',
-        icon: <Calendar className="h-4 w-4" />
-      };
-    }
-    
-    if (!hasProfile && isNewAccount) {
-      return { 
-        label: 'Incomplete Profile', 
-        color: 'bg-yellow-100 text-yellow-800',
-        icon: <Shield className="h-4 w-4" />
-      };
-    }
-    
-    if (!hasProfile && !isNewAccount) {
-      return { 
-        label: 'Abandoned Account', 
-        color: 'bg-red-100 text-red-800',
-        icon: <UserX className="h-4 w-4" />
-      };
-    }
-    
-    return { 
-      label: 'Inactive User', 
-      color: 'bg-orange-100 text-orange-800',
-      icon: <UserX className="h-4 w-4" />
-    };
   };
 
   useEffect(() => {
@@ -215,7 +213,7 @@ const UserJourney = () => {
               </CardDescription>
             </div>
             <Button 
-              onClick={loadUsersFromCache} 
+              onClick={loadUsersFromAdmin} 
               disabled={loading}
               variant="outline"
               size="sm"
@@ -361,6 +359,7 @@ const UserJourney = () => {
                           Created {daysSinceCreation === 'Unknown' ? 'Unknown' : `${daysSinceCreation} days ago`}
                           {user.profileComplete && ' • Profile Complete'}
                           {user.tripId && ' • Has Trip'}
+                          {user.journeyStage && ` • ${user.journeyStage}`}
                         </div>
                       </div>
                     </div>
