@@ -256,65 +256,52 @@ TripWell Team`
   };
 
   const getUserStatus = (user) => {
-    const tripStatus = getTripStatus(user);
-    const daysSinceCreation = getDaysSinceCreation(user.createdAt);
-    
-    // Determine if user is safe to delete
-    const isNewAccount = daysSinceCreation <= 15; // New if created within 15 days
-    const hasProfile = user.profileComplete;
+    // ✅ Use Python-interpreted user state instead of custom logic
+    const pythonUserState = user.userState || 'active';
     const hasTrip = !!user.tripId;
     
-    if (hasTrip && !tripStatus.safeToDelete) {
-      return { 
-        label: 'Active User', 
-        color: 'bg-green-100 text-green-800', 
-        safeToDelete: false,
-        reason: 'Has active trip'
-      };
+    // Map Python user states to admin display
+    switch (pythonUserState) {
+      case 'active':
+        return { 
+          label: 'Active', 
+          color: 'bg-green-100 text-green-800', 
+          safeToDelete: false,
+          reason: 'Active user - do not delete'
+        };
+      
+      case 'demo':
+        return { 
+          label: 'Demo User', 
+          color: 'bg-blue-100 text-blue-800', 
+          safeToDelete: false,
+          reason: 'Demo user - give them time to convert'
+        };
+      
+      case 'inactive':
+        return { 
+          label: 'Inactive', 
+          color: 'bg-orange-100 text-orange-800', 
+          safeToDelete: true,
+          reason: 'Inactive user - safe to delete after 30 days'
+        };
+      
+      case 'abandoned':
+        return { 
+          label: 'Abandoned', 
+          color: 'bg-red-100 text-red-800', 
+          safeToDelete: true,
+          reason: 'Abandoned account - safe to delete'
+        };
+      
+      default:
+        return { 
+          label: 'Unknown', 
+          color: 'bg-gray-100 text-gray-800', 
+          safeToDelete: false,
+          reason: 'Unknown state - do not delete'
+        };
     }
-    
-    if (hasTrip) {
-      return { 
-        label: 'Active User', 
-        color: 'bg-green-100 text-green-800', 
-        safeToDelete: false,
-        reason: 'Has trip - do not delete'
-      };
-    }
-    
-    if (hasProfile && isNewAccount) {
-      return { 
-        label: 'New User', 
-        color: 'bg-blue-100 text-blue-800', 
-        safeToDelete: false,
-        reason: 'New account with profile - give them time'
-      };
-    }
-    
-    if (!hasProfile && isNewAccount) {
-      return { 
-        label: 'Incomplete Profile', 
-        color: 'bg-yellow-100 text-yellow-800', 
-        safeToDelete: false,
-        reason: 'New account - give them time to complete profile'
-      };
-    }
-    
-    if (!hasProfile && !isNewAccount) {
-      return { 
-        label: 'Abandoned Account', 
-        color: 'bg-red-100 text-red-800', 
-        safeToDelete: true,
-        reason: 'Account >15 days old with no profile - safe to delete'
-      };
-    }
-    
-    return { 
-      label: 'Inactive User', 
-      color: 'bg-orange-100 text-orange-800', 
-      safeToDelete: true,
-      reason: 'Account >15 days old with profile but no trip'
-    };
   };
 
   useEffect(() => {
@@ -466,7 +453,9 @@ TripWell Team`
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${tripStatus.color}`}>
                                 {tripStatus.label}
                               </span>
-                              
+                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                {user.journeyStage || 'new_user'}
+                              </span>
                             </div>
                           </div>
                         </div>
