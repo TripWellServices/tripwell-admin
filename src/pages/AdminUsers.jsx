@@ -60,7 +60,7 @@ const AdminUsers = () => {
 
     try {
       console.log('🗑️ Sending DELETE request for user:', user.userId);
-      const response = await fetch(`https://gofastbackend.onrender.com/tripwell/admin/delete/user/${user.userId}`, {
+      const response = await fetch(`https://gofastbackend.onrender.com/tripwell/admin/users/${user.userId}`, {
         method: 'DELETE',
         headers: { 
           'Content-Type': 'application/json'
@@ -182,7 +182,7 @@ TripWell Team`
     setLoading(true);
     
     const deletePromises = Array.from(selectedUsers).map(userId =>
-      fetch(`https://gofastbackend.onrender.com/tripwell/admin/delete/user/${userId}`, {
+      fetch(`https://gofastbackend.onrender.com/tripwell/admin/users/${userId}`, {
         method: 'DELETE',
         headers: { 
           'Content-Type': 'application/json'
