@@ -1,33 +1,79 @@
 # Admin Dashboard Operations Guide
 
+## 📚 **REFERENCE DOCUMENTS**
+- **Backend Journey Stages**: `gofastbackend/JOURNEY_STAGE_MAPPING.md` - Complete journey stage system
+- **Legacy Funnel Tracking**: `gofastbackend/ADMIN_DASHBOARD_FUNNEL_TRACKING.md` - Deprecated but contains user status definitions
+
 ## 🚨 **ADMIN DASHBOARD CURRENT STATUS**
 
 The admin dashboard is currently being rebuilt with proper user management tools. Here's what's working and what needs to be fixed:
 
 ## 📊 **CURRENT ADMIN PAGES**
 
-### **1. AdminUsers.jsx** - Main User Management
-- **Status**: ✅ Basic functionality working
-- **Issues**: 
-  - ❌ "Modify" button doesn't open FullUser component
-  - ❌ "Journey Stages" button doesn't work
-  - ❌ No duplicate trip cleanup tools
+### **1. AdminUsers.jsx** - Main User Management Hub
+- **Status**: ✅ Core functionality working
+- **Features**:
+  - ✅ User list with journey stages
+  - ✅ Delete users (with proper cascade)
+  - ✅ "Modify" button opens FullUser component
+  - ✅ Message users with templates
+- **Purpose**: Central hub for all user management operations
 
-### **2. FullUser.jsx** - Complete User View
-- **Status**: 🔄 Being built
+### **2. FullUser.jsx** - Complete User Edit Capability
+- **Status**: ✅ Fully functional
+- **Access**: Click "Modify" button in AdminUsers.jsx
 - **Features**:
   - ✅ Full user data display
-  - ✅ Duplicate trip detection
-  - ✅ Trip cleanup tools
+  - ✅ Duplicate trip detection and cleanup
   - ✅ Journey stage reset tools
+  - ✅ Trip management
+  - ✅ User state management
+- **Purpose**: Complete user editing and management from AdminUsers central
 
 ### **3. UserStages.jsx** - Journey Management
 - **Status**: 🔄 Placeholder component
-- **Purpose**: Manage user journey stages and flags
+- **Purpose**: Bulk journey stage management (future feature)
 
 ## 🛠️ **BACKEND ENDPOINTS**
 
-### **New Admin User Management Routes** (`/tripwell/admin/`)
+### **⚠️ IMPORTANT: adminUserModifyRoute is the SOURCE OF TRUTH for all user deletion operations!**
+
+**All user deletion should go through `/tripwell/admin/users/:id` which uses the unified cascade deletion service.**
+
+### **🔄 Unified Cascade Deletion Service**
+**Location**: `gofastbackend/services/TripWell/cascadeDeletionService.js`
+**Purpose**: Single source of truth for all cascade deletion operations
+**Functions**:
+- `cascadeDelete(userId, tripId, session)` - Unified deletion (userId OR tripId)
+- `deleteTripCascade(tripId, session)` - Delete trip and all associated data
+- `deleteUserTripsCascade(userId, session)` - Delete all user's trips and data
+- `deleteOrphanedDataCascade(session)` - Clean up orphaned data
+
+**What gets deleted in cascade**:
+- ✅ JoinCode registry entries
+- ✅ TripBase records  
+- ✅ TripIntent records
+- ✅ TripItinerary records
+- ✅ TripDay records
+- ✅ AnchorLogic records
+- ✅ TripReflection records
+
+### **Existing Admin Routes** (`/tripwell/admin/`)
+
+#### **DELETE `/users/:id`** - Delete User (SOURCE OF TRUTH)
+**Location**: `adminUserModifyRoute.js`
+**Uses**: Unified cascade deletion service
+**What it does**: Deletes user and all associated data
+
+#### **GET `/users`** - Get All Users
+**Location**: `adminUserFetchRoute.js`
+**Returns**: List of all users with journey stages
+
+#### **PUT `/users/:id`** - Update User
+**Location**: `adminUserModifyRoute.js`
+**Purpose**: Update user fields
+
+### **FullUser Component Endpoints** (for admin dashboard)
 
 #### **GET `/user/:userId`** - Get Full User Data
 ```javascript
@@ -77,6 +123,22 @@ The admin dashboard is currently being rebuilt with proper user management tools
 // Updates users who had this trip
 ```
 
+## 🎯 **USER EDIT FLOW**
+
+### **How to Edit Users:**
+1. **Go to AdminUsers.jsx** - Main user management hub
+2. **Click "Modify" button** - Opens FullUser component modal
+3. **Use FullUser tools** - Complete user editing and management
+4. **Close modal** - Returns to AdminUsers list
+
+### **FullUser Edit Capabilities:**
+- ✅ View complete user data (profile, trips, join codes)
+- ✅ Clean up duplicate trips (select which to keep)
+- ✅ Reset journey stages (new_user, profile_complete, trip_set_done, etc.)
+- ✅ Reset user states (demo_only, active, abandoned, inactive)
+- ✅ Delete individual trips
+- ✅ View trip summaries and analytics
+
 ## 🚨 **CURRENT ISSUES TO FIX**
 
 ### **1. AdminUsers Modify Button** ✅ FIXED
@@ -91,8 +153,15 @@ The admin dashboard is currently being rebuilt with proper user management tools
 **Problem**: Users with existing trips are being sent to trip setup, creating duplicates
 **Fix**: Check if user has trips and route them directly to their trip
 
-### **4. User Delete Methods**
-**Status**: ✅ Working - Delete endpoint properly cascades and removes all user data
+### **4. User Delete Methods** ✅ SOURCE OF TRUTH
+**Status**: ✅ Working - Uses unified cascade deletion service
+**Endpoint**: `DELETE /tripwell/admin/users/:id`
+**What it does**: 
+- ✅ Deletes all user's trips and associated data (cascade deletion)
+- ✅ Deletes JoinCode registry entries
+- ✅ Deletes TripBase records
+- ✅ Deletes all related data (TripIntent, TripItinerary, etc.)
+- ✅ Deletes the user record
 **What "Active" means**: 
 - **Active User** = Has active trip (do not delete)
 - **New User** = Account <15 days old with profile (give them time)
@@ -102,7 +171,9 @@ The admin dashboard is currently being rebuilt with proper user management tools
 
 ## 🎯 **USER JOURNEY STAGES**
 
-Based on `ADMIN_DASHBOARD_FUNNEL_TRACKING.md`:
+**Refer to `JOURNEY_STAGE_MAPPING.md` in backend for complete journey stage system details.**
+
+Based on `ADMIN_DASHBOARD_FUNNEL_TRACKING.md` (deprecated) and `JOURNEY_STAGE_MAPPING.md` (current):
 
 ### **Python-Managed Journey Stages**
 - **new_user** - Pre profile complete

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, MapPin, BarChart3, Database, RefreshCw, CheckCircle, LogOut, MessageSquare, TrendingUp, Brain, Trash2, Bomb } from 'lucide-react';
+import { Users, MapPin, BarChart3, Database, RefreshCw, CheckCircle, LogOut, MessageSquare, TrendingUp, Brain } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,6 @@ const AdminDashboardChoices = () => {
   const [isHydrated, setIsHydrated] = useState(false);
   const [userCount, setUserCount] = useState(0);
   const [hydrating, setHydrating] = useState(false);
-  const [cleaning, setCleaning] = useState(false);
 
   const handleHydrateUsers = async () => {
     setHydrating(true);
@@ -54,34 +53,6 @@ const AdminDashboardChoices = () => {
     }
   };
 
-  const handleCleanupOrphanedData = async () => {
-    setCleaning(true);
-    try {
-      const response = await fetch('https://gofastbackend.onrender.com/tripwell/admin/cleanup-orphaned-data', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      
-      if (result.success) {
-        toast.success(`✅ Cleanup complete! Deleted ${result.details.totalDeleted} orphaned records`);
-        console.log('Cleanup details:', result.details);
-      } else {
-        throw new Error(result.error || 'Cleanup failed');
-      }
-    } catch (err) {
-      toast.error('Failed to cleanup orphaned data: ' + err.message);
-    } finally {
-      setCleaning(false);
-    }
-  };
 
 
   const handleLogout = () => {
@@ -189,16 +160,6 @@ const AdminDashboardChoices = () => {
                 >
                   <RefreshCw className={`h-4 w-4 mr-2 ${hydrating ? 'animate-spin' : ''}`} />
                   {hydrating ? 'Hydrating...' : 'Refresh Users'}
-                </Button>
-                <Button
-                  onClick={handleCleanupOrphanedData}
-                  disabled={cleaning}
-                  variant="outline"
-                  size="sm"
-                  className="text-red-600 border-red-200 hover:bg-red-50"
-                >
-                  <Trash2 className={`h-4 w-4 mr-2 ${cleaning ? 'animate-pulse' : ''}`} />
-                  {cleaning ? 'Cleaning...' : 'Cleanup DB'}
                 </Button>
               </div>
             </div>
