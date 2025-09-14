@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Users, RefreshCw, Trash2, Edit, Mail, Calendar, Shield, MessageSquare, CheckSquare, Square } from 'lucide-react';
+import { Users, RefreshCw, Trash2, Edit, Mail, Calendar, Shield, MessageSquare, CheckSquare, Square, Settings, Flag } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
+import FullUser from './FullUser';
+import UserStages from './UserStages';
 
 const AdminUsers = () => {
   const { isAdmin } = useAuth();
@@ -12,6 +14,7 @@ const AdminUsers = () => {
   const [selectedUsers, setSelectedUsers] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const loadUsersFromAdmin = async () => {
     setLoading(true);
@@ -105,8 +108,8 @@ const AdminUsers = () => {
   };
 
   const handleModifyUser = (userId) => {
-    toast.info('Modify user functionality coming soon!');
-    // TODO: Implement user modification
+    console.log('🔧 Opening FullUser for userId:', userId);
+    setSelectedUser(userId);
   };
 
   const handleMessageUser = (user) => {
@@ -490,6 +493,14 @@ TripWell Team`
           )}
         </CardContent>
       </Card>
+      
+      {/* FullUser Modal */}
+      {selectedUser && (
+        <FullUser 
+          userId={selectedUser} 
+          onClose={() => setSelectedUser(null)} 
+        />
+      )}
     </div>
   );
 };
