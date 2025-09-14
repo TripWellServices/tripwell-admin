@@ -15,6 +15,7 @@ const AdminUsers = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUserData, setSelectedUserData] = useState(null);
 
   const loadUsersFromAdmin = async () => {
     setLoading(true);
@@ -109,7 +110,9 @@ const AdminUsers = () => {
 
   const handleModifyUser = (userId) => {
     console.log('🔧 Opening FullUser for userId:', userId);
+    const userData = users.find(user => user.userId === userId);
     setSelectedUser(userId);
+    setSelectedUserData(userData);
   };
 
   const handleMessageUser = (user) => {
@@ -495,10 +498,14 @@ TripWell Team`
       </Card>
       
       {/* FullUser Modal */}
-      {selectedUser && (
+      {selectedUser && selectedUserData && (
         <FullUser 
-          userId={selectedUser} 
-          onClose={() => setSelectedUser(null)} 
+          userId={selectedUser}
+          userData={selectedUserData}
+          onClose={() => {
+            setSelectedUser(null);
+            setSelectedUserData(null);
+          }} 
         />
       )}
     </div>

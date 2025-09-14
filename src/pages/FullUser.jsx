@@ -3,40 +3,18 @@ import { X, Trash2, RefreshCw, AlertTriangle, CheckCircle, Calendar, MapPin, Use
 import { Button } from '../components/ui/button';
 import toast from 'react-hot-toast';
 
-const FullUser = ({ userId, onClose }) => {
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
+const FullUser = ({ userId, userData, onClose }) => {
+  const [loading, setLoading] = useState(false);
   const [cleaningUp, setCleaningUp] = useState(false);
   const [selectedTripToKeep, setSelectedTripToKeep] = useState('');
 
   useEffect(() => {
-    if (userId) {
-      loadFullUserData();
-    }
-  }, [userId]);
-
-  const loadFullUserData = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`https://gofastbackend.onrender.com/tripwell/admin/user/${userId}`);
-      if (!response.ok) throw new Error('Failed to load user data');
-      
-      const data = await response.json();
-      setUserData(data);
-      
+    if (userData && userData.trips && userData.trips.length > 1) {
       // Auto-select the most recent trip if there are duplicates
-      if (data.trips.length > 1) {
-        const mostRecent = data.trips[0]; // Already sorted by createdAt desc
-        setSelectedTripToKeep(mostRecent._id);
-      }
-      
-    } catch (error) {
-      console.error('Error loading user data:', error);
-      toast.error('Failed to load user data');
-    } finally {
-      setLoading(false);
+      const mostRecent = userData.trips[0]; // Already sorted by createdAt desc
+      setSelectedTripToKeep(mostRecent._id);
     }
-  };
+  }, [userData]);
 
   const handleCleanupDuplicates = async () => {
     if (!selectedTripToKeep) {
@@ -90,31 +68,67 @@ const FullUser = ({ userId, onClose }) => {
     }
   };
 
-  if (loading) {
+  if (!userData) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6">
-          <div className="flex items-center space-x-2">
-            <RefreshCw className="h-4 w-4 animate-spin" />
-            <span>Loading user data...</span>
+        <div className="bg-white rounded-lg p-6 max-w-md">
+          <div className="flex items-center space-x-2 mb-4">
+            <AlertTriangle className="h-5 w-5 text-red-500" />
+            <h3 className="text-lg font-semibold text-red-500">Data Hydration Error</h3>
+          </div>
+          <p className="text-gray-600 mb-4">
+            Failed to load user data. This could be due to:
+          </p>
+          <ul className="text-sm text-gray-500 mb-4 space-y-1">
+            <li>• User data not found in frontend state</li>
+            <li>• Backend connection issues</li>
+            <li>• User ID mismatch</li>
+          </ul>
+          <div className="flex space-x-2">
+            <Button onClick={onClose} variant="outline">Close</Button>
+            <Button onClick={() => window.location.reload()} variant="default">
+              Refresh Page
+            </Button>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!userData) {
+  // Use the user data from frontend (no backend call needed)
+  const user = userData;
+  const trips = userData.trips || [];
+  const joinCodes = userData.joinCodes || [];
+  
+  // Validate that we have essential user data
+  if (!user.email || !user.userId) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6">
-          <p className="text-red-500">Failed to load user data</p>
-          <Button onClick={onClose} className="mt-4">Close</Button>
+        <div className="bg-white rounded-lg p-6 max-w-md">
+          <div className="flex items-center space-x-2 mb-4">
+            <AlertTriangle className="h-5 w-5 text-red-500" />
+            <h3 className="text-lg font-semibold text-red-500">Invalid User Data</h3>
+          </div>
+          <p className="text-gray-600 mb-4">
+            User data is missing essential fields (email, userId). Cannot display user details.
+          </p>
+          <div className="flex space-x-2">
+            <Button onClick={onClose} variant="outline">Close</Button>
+            <Button onClick={() => window.location.reload()} variant="default">
+              Refresh Page
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
-
-  const { user, trips, joinCodes, summary } = userData;
+  
+  const summary = {
+    totalTrips: trips.length,
+    activeTrips: trips.filter(trip => !trip.tripComplete).length,
+    completedTrips: trips.filter(trip => trip.tripComplete).length,
+    joinCodesCreated: joinCodes.length
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
