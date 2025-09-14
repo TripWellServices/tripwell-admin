@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, RefreshCw, Trash2, Edit, Mail, Calendar, Shield, MessageSquare, CheckSquare, Square, Settings, Flag } from 'lucide-react';
+import { Users, RefreshCw, Trash2, Edit, Mail, Calendar, Shield, MessageSquare, CheckSquare, Square, Settings, Flag, Key } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
 import toast, { Toaster } from 'react-hot-toast';
@@ -446,6 +446,10 @@ TripWell Team`
                               <span className="flex items-center gap-1">
                                 <Shield className="h-3 w-3" />
                                 Role: {user.role}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Key className="h-3 w-3" />
+                                Firebase: {user.firebaseId ? user.firebaseId.substring(0, 8) + '...' : 'N/A'}
                               </span>
                                                              <span className="flex items-center gap-1">
                                  <Calendar className="h-3 w-3" />
