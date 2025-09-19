@@ -69,7 +69,10 @@ PUT  /tripwell/admin/fixProfileComplete         - Fix profileComplete flag
 ### **Key Features**
 
 #### **AdminUsers.jsx**
-- ✅ User list with journey stages
+- ✅ User list with journey stages and user progression
+- ✅ Journey stage summary dashboard (New User, Profile Complete, Trip Set Done, Itinerary Complete)
+- ✅ User status badges (Active, Demo, Inactive, Abandoned)
+- ✅ Trip status indicators (No Trip, Active Trip, Trip Complete)
 - ✅ Delete users (with proper cascade)
 - ✅ "Modify" button opens FullUser component
 - ✅ Message users with templates
@@ -116,20 +119,32 @@ When you delete a user, the system automatically deletes:
 
 ## 📊 **User Status Categories**
 
-The admin dashboard shows these user states:
-- **Active User** - Has active trip (do not delete)
-- **New User** - Account <15 days old with profile (give them time)
-- **Incomplete Profile** - Missing profile data (safe to delete after 30 days)
-- **Abandoned Account** - No activity for 30+ days (safe to delete)
-- **Inactive** - Low engagement (safe to delete after 60 days)
+### **User States (Python-Interpreted)**
+- **Active** - Active user (do not delete)
+- **Demo** - Demo user (give them time to convert)
+- **Inactive** - Low engagement (safe to delete after 30 days)
+- **Abandoned** - No activity for 30+ days (safe to delete)
+
+### **Journey Stages**
+- **New User** - Just signed up
+- **Profile Complete** - Completed profile setup
+- **Trip Set Done** - Created a trip
+- **Itinerary Complete** - Completed itinerary
+
+### **Trip Status**
+- **No Trip** - User hasn't created a trip
+- **Active Trip** - User has an active trip
+- **Trip Complete** - User completed their trip
 
 ## 🚨 **Important Notes**
 
 1. **Cascade Deletion**: Deleting a user removes ALL their data permanently
 2. **User States**: Based on Python analysis, not custom logic
-3. **Journey Stages**: Track user progression through the app
-4. **Demo Users**: Use FunnelTracker to monitor conversion potential
-5. **Full App Users**: Use AdminUsers for management and UserJourney for analytics
+3. **Journey Stages**: Track user progression through the app (New User → Profile Complete → Trip Set Done → Itinerary Complete)
+4. **Journey Stage Summary**: Dashboard shows count of users in each stage
+5. **Demo Users**: Use FunnelTracker to monitor conversion potential
+6. **Full App Users**: Use AdminUsers for management and UserJourney for analytics
+7. **Status Badges**: Each user shows User State, Journey Stage, and Trip Status badges
 
 ## 🔍 **Troubleshooting**
 

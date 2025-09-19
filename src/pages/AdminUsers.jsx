@@ -314,6 +314,47 @@ TripWell Team`
     }
   };
 
+  const getJourneyStage = (user) => {
+    const journeyStage = user.journeyStage || 'new_user';
+    
+    switch (journeyStage) {
+      case 'new_user':
+        return { 
+          label: 'New User', 
+          color: 'bg-blue-100 text-blue-800',
+          description: 'Just signed up'
+        };
+      
+      case 'profile_complete':
+        return { 
+          label: 'Profile Complete', 
+          color: 'bg-green-100 text-green-800',
+          description: 'Completed profile setup'
+        };
+      
+      case 'trip_set_done':
+        return { 
+          label: 'Trip Set Done', 
+          color: 'bg-yellow-100 text-yellow-800',
+          description: 'Created a trip'
+        };
+      
+      case 'itinerary_complete':
+        return { 
+          label: 'Itinerary Complete', 
+          color: 'bg-purple-100 text-purple-800',
+          description: 'Completed itinerary'
+        };
+      
+      default:
+        return { 
+          label: 'Unknown Stage', 
+          color: 'bg-gray-100 text-gray-800',
+          description: 'Unknown journey stage'
+        };
+    }
+  };
+
   useEffect(() => {
     loadUsersFromAdmin();
   }, []);
@@ -382,6 +423,26 @@ TripWell Team`
               No TripWell users found.
             </div>
           ) : (
+            <>
+              {/* Journey Stage Summary */}
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h3 className="text-lg font-semibold mb-3">Journey Stage Summary</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {['new_user', 'profile_complete', 'trip_set_done', 'itinerary_complete'].map(stage => {
+                    const count = users.filter(user => (user.journeyStage || 'new_user') === stage).length;
+                    const stageInfo = getJourneyStage({ journeyStage: stage });
+                    return (
+                      <div key={stage} className="text-center">
+                        <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${stageInfo.color}`}>
+                          {stageInfo.label}
+                        </div>
+                        <div className="text-2xl font-bold mt-1">{count}</div>
+                        <div className="text-xs text-gray-600">{stageInfo.description}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             <div className="space-y-4">
               {/* Select All Header */}
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
@@ -407,6 +468,7 @@ TripWell Team`
 
               {users.map((user) => {
                 const userStatus = getUserStatus(user);
+                const journeyStage = getJourneyStage(user);
                 const tripStatus = getTripStatus(user);
                 const daysSinceCreation = getDaysSinceCreation(user.createdAt);
                 const isSelected = selectedUsers.has(user.userId);
@@ -463,6 +525,15 @@ TripWell Team`
                             <div className="flex items-center gap-2">
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${userStatus.color}`}>
                                 {userStatus.label}
+                              </span>
+                              <span 
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${journeyStage.color}`}
+                                title={journeyStage.description}
+                              >
+                                {journeyStage.label}
+                              </span>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${tripStatus.color}`}>
+                                {tripStatus.label}
                               </span>
                             </div>
                           </div>
