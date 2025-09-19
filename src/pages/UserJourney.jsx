@@ -213,7 +213,7 @@ const UserJourney = () => {
               </CardDescription>
             </div>
             <Button 
-              onClick={loadUsersFromAdmin} 
+              onClick={loadUsersFromCache} 
               disabled={loading}
               variant="outline"
               size="sm"

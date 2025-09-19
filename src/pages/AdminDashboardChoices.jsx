@@ -70,46 +70,18 @@ const AdminDashboardChoices = () => {
 
   const navigationCards = [
     {
-      title: 'User Admin',
-      description: 'Manage users, view profiles, and handle user data',
+      title: 'Admin Users',
+      description: 'Manage users, delete with cascade, view full user details, track journey stages',
       icon: <Users className="h-8 w-8" />,
       route: '/user-admin',
       color: 'bg-blue-50 border-blue-200 hover:bg-blue-100'
     },
     {
-      title: 'Message Center',
-      description: 'Send targeted messages to users with templates',
-      icon: <MessageSquare className="h-8 w-8" />,
-      route: '/message-center',
-      color: 'bg-orange-50 border-orange-200 hover:bg-orange-100'
-    },
-    {
-      title: 'User Journey',
-      description: 'Track full app users through their TripWell experience',
-      icon: <BarChart3 className="h-8 w-8" />,
-      route: '/user-journey',
-      color: 'bg-green-50 border-green-200 hover:bg-green-100'
-    },
-    {
       title: 'Funnel Tracker',
-      description: 'Monitor demo users and conversion potential',
+      description: 'Monitor demo users and pre-onboarding conversion potential',
       icon: <TrendingUp className="h-8 w-8" />,
       route: '/funnel-tracker',
       color: 'bg-purple-50 border-purple-200 hover:bg-purple-100'
-    },
-    {
-      title: 'Trip Dashboard',
-      description: 'Monitor active trips, planning status, and trip analytics',
-      icon: <MapPin className="h-8 w-8" />,
-      route: '/trip-dashboard',
-      color: 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100'
-    },
-    {
-      title: 'User State Testing',
-      description: 'Test Python user analysis and state management',
-      icon: <Brain className="h-8 w-8" />,
-      route: '/usertest',
-      color: 'bg-yellow-50 border-yellow-200 hover:bg-yellow-100'
     }
   ];
 
@@ -120,7 +92,7 @@ const AdminDashboardChoices = () => {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">TripWell Admin Portal</h1>
-          <p className="text-gray-600 mt-2">Choose your admin dashboard</p>
+          <p className="text-gray-600 mt-2">User management and analytics dashboard</p>
         </div>
         <Button variant="outline" onClick={handleLogout}>
           <LogOut className="h-4 w-4 mr-2" />

@@ -67,7 +67,9 @@ const AdminUsers = () => {
       const response = await fetch(`https://gofastbackend.onrender.com/tripwell/admin/users/${user.userId}`, {
         method: 'DELETE',
         headers: { 
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'username': 'admin',
+          'password': 'tripwell2025'
         }
       });
 
@@ -191,7 +193,9 @@ TripWell Team`
       fetch(`https://gofastbackend.onrender.com/tripwell/admin/users/${userId}`, {
         method: 'DELETE',
         headers: { 
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'username': 'admin',
+          'password': 'tripwell2025'
         }
       })
     );
