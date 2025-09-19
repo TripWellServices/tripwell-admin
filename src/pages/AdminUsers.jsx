@@ -443,7 +443,8 @@ TripWell Team`
                   })}
                 </div>
               </div>
-            <div className="space-y-4">
+              
+              <div className="space-y-4">
               {/* Select All Header */}
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
                 <button
@@ -571,7 +572,8 @@ TripWell Team`
                   </div>
                 );
               })}
-            </div>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
