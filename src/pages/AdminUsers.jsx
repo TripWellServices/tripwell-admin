@@ -586,7 +586,8 @@ TripWell Team`
           onClose={() => {
             setSelectedUser(null);
             setSelectedUserData(null);
-          }} 
+          }}
+          onReload={loadUsersFromAdmin}
         />
       )}
     </div>

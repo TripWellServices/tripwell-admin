@@ -3,7 +3,7 @@ import { X, Trash2, RefreshCw, AlertTriangle, CheckCircle, Calendar, MapPin, Use
 import { Button } from '../components/ui/button';
 import toast from 'react-hot-toast';
 
-const FullUser = ({ userId, userData, onClose }) => {
+const FullUser = ({ userId, userData, onClose, onReload }) => {
   const [loading, setLoading] = useState(false);
   const [cleaningUp, setCleaningUp] = useState(false);
   const [selectedTripToKeep, setSelectedTripToKeep] = useState('');
@@ -36,7 +36,9 @@ const FullUser = ({ userId, userData, onClose }) => {
       toast.success(`Cleaned up ${result.tripsRemoved} duplicate trips`);
       
       // Reload user data
-      await loadFullUserData();
+      if (onReload) {
+        await onReload();
+      }
       
     } catch (error) {
       console.error('Error cleaning up duplicates:', error);
@@ -46,25 +48,59 @@ const FullUser = ({ userId, userData, onClose }) => {
     }
   };
 
-  const handleResetJourney = async (journeyStage, userState) => {
+  const handleResetJourney = async (journeyStage, userStatus) => {
     try {
-      const response = await fetch(`https://gofastbackend.onrender.com/tripwell/admin/user/${userId}/reset-journey`, {
+      const response = await fetch(`https://gofastbackend.onrender.com/tripwell/usertrip/reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ journeyStage, userState })
+        body: JSON.stringify({ 
+          userId, 
+          resetType: "stage",
+          journeyStage, 
+          userStatus 
+        })
       });
 
       if (!response.ok) throw new Error('Failed to reset journey');
       
       const result = await response.json();
-      toast.success('User journey reset successfully');
+      toast.success(`User reset to ${journeyStage}/${userStatus}`);
       
       // Reload user data
-      await loadFullUserData();
+      if (onReload) {
+        await onReload();
+      }
       
     } catch (error) {
       console.error('Error resetting journey:', error);
       toast.error('Failed to reset user journey');
+    }
+  };
+
+  const handleCompleteReset = async () => {
+    try {
+      const response = await fetch(`https://gofastbackend.onrender.com/tripwell/usertrip/reset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId, 
+          resetType: "new_user"
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to reset user');
+      
+      const result = await response.json();
+      toast.success(`User completely reset to new user state. Deleted ${result.results?.tripsDeleted || 0} trips.`);
+      
+      // Reload user data
+      if (onReload) {
+        await onReload();
+      }
+      
+    } catch (error) {
+      console.error('Error resetting user:', error);
+      toast.error('Failed to reset user to new state');
     }
   };
 
@@ -262,11 +298,18 @@ const FullUser = ({ userId, userData, onClose }) => {
         {/* Journey Management */}
         <div className="bg-gray-50 p-4 rounded-lg">
           <h3 className="font-semibold mb-3">Journey Management</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleCompleteReset}
+            >
+              🗑️ Complete Reset
+            </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => handleResetJourney('new_user', 'demo_only')}
+              onClick={() => handleResetJourney('new_user', 'signup')}
             >
               Reset to New User
             </Button>
